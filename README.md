@@ -109,6 +109,6 @@ julia --project -e 'using Pkg; Pkg.test()'
 
 ## References
 
-- Bindeman, I., Melnik, O., 2026. Non-equilibrium behavior of trace elements during zircon crystallization from the melt. *Earth and Planetary Science Letter*s* 673, 119723. https://doi.org/10.1016/j.epsl.2025.119723
+- Bindeman, I., Melnik, O., 2026. Non-equilibrium behavior of trace elements during zircon crystallization from the melt. *Earth and Planetary Science Letters* 673, 119723. https://doi.org/10.1016/j.epsl.2025.119723
 - Boehnke et al. (2013) *Chem. Geol.* **351**, 324 — Zr saturation model
 - Watson (1996) — Zr diffusion parameterisation

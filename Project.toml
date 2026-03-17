@@ -1,9 +1,10 @@
 name = "ZirconGrowth"
 uuid = "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
-authors = ["ZirconGrowth contributors"]
 version = "0.1.0"
+authors = ["ZirconGrowth contributors"]
 
 [deps]
+BenchmarkTools = "6e4b80f9-dd63-53aa-95a3-0cdb28fa8baf"
 DelimitedFiles = "8bb1440f-4735-579b-a4ab-409b98df4dab"
 
 [weakdeps]
@@ -11,6 +12,9 @@ GLMakie = "e9467ef8-e4e7-5192-8a1a-b1aee30e663a"
 
 [extensions]
 ZirconGrowthGLMakieExt = "GLMakie"
+
+[compat]
+BenchmarkTools = "1.6.3"
 
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
