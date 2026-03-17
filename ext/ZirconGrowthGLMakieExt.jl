@@ -35,23 +35,42 @@ function ZirconGrowth.plot_trace_properties(Th::AbstractVector{Float64},
 
     colors = _turbo_colors(nelem)
 
+    # Helper: place a label on a line at a given x-position
+    function _label_on_line!(ax, xv, yv, xpos, label; color=:black, fontsize=14)
+        # Interpolate y at xpos
+        idx = searchsortedfirst(xv, xpos)
+        idx = clamp(idx, 2, length(xv))
+        t = (xpos - xv[idx-1]) / (xv[idx] - xv[idx-1])
+        ypos = yv[idx-1] + t * (yv[idx] - yv[idx-1])
+        text!(ax, xpos, ypos; text=label, color=color, fontsize=fontsize,
+              font=:bold, align=(:center, :bottom))
+    end
+
+    # Distribute label positions across the x range to reduce overlap
+    xmin, xmax = extrema(xvals)
+    n_labels = nelem + 1  # +1 for Zr
+    label_xpos = range(xmin + 0.15 * (xmax - xmin),
+                       xmax - 0.05 * (xmax - xmin), length=n_labels)
+
     ax1 = Axis(fig[1, 1]; xlabel="1000/T (K)", ylabel="ln Kd",
                title="Partition coefficients")
-    lines!(ax1, xvals, zr_kd; color=:black, linewidth=3, linestyle=:dash, label="Zr")
+    lines!(ax1, xvals, zr_kd; color=:black, linewidth=3, linestyle=:dash)
+    _label_on_line!(ax1, xvals, zr_kd, label_xpos[1], "Zr"; color=:black)
     for j in 1:nelem
-        lines!(ax1, xvals, kd_mat[:, j]; color=colors[j], linewidth=2,
-               label=element_names[j])
+        lines!(ax1, xvals, kd_mat[:, j]; color=colors[j], linewidth=2)
+        _label_on_line!(ax1, xvals, kd_mat[:, j], label_xpos[j+1],
+                        element_names[j]; color=colors[j])
     end
-    axislegend(ax1; position=:lt, framevisible=false)
 
     ax2 = Axis(fig[1, 2]; xlabel="1000/T (K)", ylabel="ln D (cm²/s)",
                title="Diffusion coefficients")
-    lines!(ax2, xvals, zr_dif; color=:black, linewidth=3, linestyle=:dash, label="Zr")
+    lines!(ax2, xvals, zr_dif; color=:black, linewidth=3, linestyle=:dash)
+    _label_on_line!(ax2, xvals, zr_dif, label_xpos[1], "Zr"; color=:black)
     for j in 1:nelem
-        lines!(ax2, xvals, dif_mat[:, j]; color=colors[j], linewidth=2,
-               label=element_names[j])
+        lines!(ax2, xvals, dif_mat[:, j]; color=colors[j], linewidth=2)
+        _label_on_line!(ax2, xvals, dif_mat[:, j], label_xpos[j+1],
+                        element_names[j]; color=colors[j])
     end
-    axislegend(ax2; position=:rt, framevisible=false)
 
     return fig
 end
