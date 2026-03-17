@@ -92,7 +92,11 @@ ZirconGrowth.jl/
 │   └── element_data.csv   # default trace-element concentrations
 └── scripts/
     ├── plot_recipes.jl    # reusable plotting helpers
-    ├── reproduce_fig3.jl  # reproduce Figure 3 from the paper
+    ├── reproduce_fig2.jl  # reproduce Figure 2 (Kd & D vs T)
+    ├── reproduce_fig3.jl  # reproduce Figure 3 (growth dynamics)
+    ├── reproduce_fig4.jl  # reproduce Figure 4 (bulk Kd sweep)
+    ├── reproduce_fig5.jl  # reproduce Figure 5 (element profiles)
+    ├── reproduce_fig6.jl  # reproduce Figure 6 (element ratios)
     └── run_figures.jl     # reproduce all paper figures
 ```
 
