@@ -1,0 +1,27 @@
+# This file is machine-generated - editing it directly is not advised
+
+julia_version = "1.12.3"
+manifest_format = "2.0"
+project_hash = "69757c9bce7469acafe108ac76e0bdbd2b14962e"
+
+[[deps.DelimitedFiles]]
+deps = ["Mmap"]
+git-tree-sha1 = "9e2f36d3c96a820c678f2f1f1782582fcf685bae"
+uuid = "8bb1440f-4735-579b-a4ab-409b98df4dab"
+version = "1.9.1"
+
+[[deps.Mmap]]
+uuid = "a63ad114-7e13-5084-954f-fe012c677804"
+version = "1.11.0"
+
+[[deps.ZirconGrowth]]
+deps = ["DelimitedFiles"]
+path = "."
+uuid = "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+version = "0.1.0"
+
+    [deps.ZirconGrowth.extensions]
+    ZirconGrowthGLMakieExt = "GLMakie"
+
+    [deps.ZirconGrowth.weakdeps]
+    GLMakie = "e9467ef8-e4e7-5192-8a1a-b1aee30e663a"
