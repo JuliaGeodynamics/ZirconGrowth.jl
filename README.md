@@ -91,6 +91,8 @@ ZirconGrowth.jl/
 ├── data/
 │   └── element_data.csv   # default trace-element concentrations
 └── scripts/
+    ├── plot_recipes.jl    # reusable plotting helpers
+    ├── reproduce_fig3.jl  # reproduce Figure 3 from the paper
     └── run_figures.jl     # reproduce all paper figures
 ```
 
