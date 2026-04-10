@@ -1,7 +1,7 @@
 name = "ZirconGrowth"
 uuid = "5085b5e1-578a-4bbf-9dfc-2862bf7461c3"
 version = "0.1.0"
-authors = ["Boris Kaus <kaus@uni-mainz.de>"]
+authors = ["Boris Kaus <kaus@uni-mainz.de>", "Oleg Melnik <oemelnik@gmail.com>"]
 
 [deps]
 DelimitedFiles = "8bb1440f-4735-579b-a4ab-409b98df4dab"
