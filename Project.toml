@@ -1,7 +1,7 @@
 name = "ZirconGrowth"
-uuid = "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+uuid = "5085b5e1-578a-4bbf-9dfc-2862bf7461c3"
 version = "0.1.0"
-authors = ["ZirconGrowth contributors"]
+authors = ["Boris Kaus <kaus@uni-mainz.de>"]
 
 [deps]
 BenchmarkTools = "6e4b80f9-dd63-53aa-95a3-0cdb28fa8baf"
