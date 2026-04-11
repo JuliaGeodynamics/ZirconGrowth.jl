@@ -1,6 +1,6 @@
 name = "ZirconGrowth"
 uuid = "5085b5e1-578a-4bbf-9dfc-2862bf7461c3"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["Boris Kaus <kaus@uni-mainz.de>", "Oleg Melnik <oemelnik@gmail.com>"]
 
 [deps]
