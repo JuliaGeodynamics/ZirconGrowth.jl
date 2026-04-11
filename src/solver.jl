@@ -67,8 +67,16 @@ function assemble_coefficients!(A::AbstractVector{Float64},
         @inbounds C_vec[1] = 1.0
         @inbounds F[1] = cm
     else
-        # Robin condition for trace elements
-        @inbounds C_vec[1] = Di - V * (xi[2] - xi[1]) * (R - s) * (1.0 - ktr)
+        # Robin condition for trace elements.
+        # Stabilised: the advective contribution V*(ktr-1)*H*dxi is clamped to
+        # its positive part so that the diagonal C_vec[1] >= Di > 0 always.
+        # This prevents a sign flip for:
+        #   - compatible elements (ktr>1) during dissolution (V<0), and
+        #   - incompatible elements (ktr<1) during fast growth (V>0).
+        # In both cases we fall back to a zero-flux (Neumann) BC, which is the
+        # correct approximation when intra-crystal profiles are not tracked.
+        adv1 = V * (xi[2] - xi[1]) * (R - s) * (ktr - 1.0)
+        @inbounds C_vec[1] = Di + (adv1 > 0.0 ? adv1 : 0.0)
         @inbounds A[1] = 0.0
         @inbounds B[1] = Di
         @inbounds F[1] = 0.0

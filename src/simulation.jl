@@ -1,7 +1,7 @@
 # ─── Main simulation loop ─────────────────────────────────────────────────────
 
 """
-    simulate_zircon_growth!(ws::SimulationWorkspace{N}, tfinal_years, params, elements) -> SimulationResult{N}
+    simulate_zircon_growth!(ws, tfinal_years, params, elements; Th_override) -> SimulationResult
 
 Run the zircon growth model **in-place** into the pre-allocated workspace `ws`.
 Performs **zero heap allocations** — all temporary and output arrays live inside
@@ -14,11 +14,20 @@ ws = SimulationWorkspace(params, elements)
 simulate_zircon_growth!(ws, 500.0, params, elements)   # 0 allocations
 simulate_zircon_growth!(ws, 500.0, params, elements)   # reuse — still 0 allocations
 ```
+
+# Keyword arguments
+- `Th_override` — optional `AbstractVector{Float64}` of length `params.nt` (K).
+  When provided, replaces the built-in linear cooling path computed from
+  `params.Td` / `params.T0`.  Use this to supply an arbitrary cooling history
+  (e.g. interpolated from field or numerical model data).  The time grid stays
+  uniform; `params.Td` and `params.T0` should match `Th_override[1]` and
+  `Th_override[end]` so that the initial Zr-saturation estimate is consistent.
 """
 function simulate_zircon_growth!(ws::SimulationWorkspace{N},
                    tfinal_years::Float64,
                    params::GrowthParams,
-                   elements::ElementData{N}) where {N}
+                   elements::ElementData{N};
+                   Th_override::Union{AbstractVector{Float64},Nothing} = nothing) where {N}
 
     nt    = params.nt
     nx    = params.nx
@@ -82,6 +91,11 @@ function simulate_zircon_growth!(ws::SimulationWorkspace{N},
     @inbounds for i in 1:nt
         Th[i] = temperature_history(Td, T0, n_osc, amp, t_phys[i], tfin)
     end
+    if Th_override !== nothing
+        length(Th_override) == nt ||
+            throw(ArgumentError("Th_override must have length params.nt = $nt, got $(length(Th_override))"))
+        copyto!(Th, Th_override)
+    end
 
     # Trace-element melt profiles (uniform initial)
     @inbounds for j in 1:ntr
@@ -121,6 +135,9 @@ function simulate_zircon_growth!(ws::SimulationWorkspace{N},
     Xs[1]  = s * Rc * 1e4
     V0     = Rc * 1e4 / tscale * tyear
 
+    # Minimum crystal radius (dimensionless): never dissolve below the initial seed.
+    s_min = s0 / Rc
+
     # Main time loop (zero allocations)
     Mpl = 0.0
     @inbounds for j in 2:nt
@@ -150,6 +167,11 @@ function simulate_zircon_growth!(ws::SimulationWorkspace{N},
             W_loc = -dXpdT * dTdt / 3.0 / R^2
             R = R0 + W_loc * dt
             s = s0_loc + V_loc * dt
+            # Prevent dissolution below the initial seed radius.
+            if s < s_min
+                s = s_min
+                V_loc = (s_min - s0_loc) / dt
+            end
             H_loc = R - s
 
             Fv[nx] = 0.0
@@ -247,7 +269,8 @@ function _assemble_col!(A::Vector{Float64}, B::Vector{Float64},
                         kpl::Float64, ktr::Float64,
                         nx::Int, Di::Float64, dt::Float64,
                         itrace::Int)
-    @inbounds C_vec[1] = Di - V * (xi[2] - xi[1]) * (R - s) * (1.0 - ktr)
+    adv1 = V * (xi[2] - xi[1]) * (R - s) * (ktr - 1.0)
+    @inbounds C_vec[1] = Di + (adv1 > 0.0 ? adv1 : 0.0)
     @inbounds A[1] = 0.0
     @inbounds B[1] = Di
     @inbounds F[1] = 0.0
@@ -305,3 +328,65 @@ end
 Alias for [`simulate_zircon_growth`](@ref).
 """
 compute_profiles(tfinal_years::Real; kwargs...) = simulate_zircon_growth(tfinal_years; kwargs...)
+
+# ─── Cooling-path convenience wrapper ────────────────────────────────────────
+
+"""
+    simulate_from_cooling_path(time_Myr, T_C; params, elements) -> SimulationResult
+
+Run the zircon growth model from a user-supplied cooling history given in
+**Myr** and **°C** on an arbitrarily (irregularly) spaced time grid.
+
+The function converts units, interpolates onto the uniform internal time grid
+defined by `params.nt`, and calls [`simulate_zircon_growth!`](@ref) with the
+resulting temperature array as `Th_override`.
+
+# Arguments
+- `time_Myr` — control-point times (Myr), sorted ascending, length ≥ 2.
+- `T_C`      — temperatures at each control point (°C), same length as `time_Myr`.
+
+# Keyword arguments
+- `params`   — [`GrowthParams`](@ref).  Defaults to `GrowthParams` constructed
+               from `time_Myr` and `T_C` (duration, initial and final T).
+               `params.Td` and `params.T0` should be consistent with
+               `T_C[1] + 273.15` and `T_C[end] + 273.15`.
+- `elements` — [`ElementData`](@ref), defaults to [`default_element_data()`](@ref).
+
+# Returns
+A [`SimulationResult`](@ref) for the full duration `time_Myr[end]` Myr.
+
+# Example
+```julia
+time_Myr = Float64[0.000, 0.005, 0.030, 0.050, 0.200]
+T_C      = Float64[940,   870,   810,   860,   680]   # reheating episode included
+
+# Minimal call — all parameters inferred from the cooling path:
+result = simulate_from_cooling_path(time_Myr, T_C)
+
+# Custom resolution:
+result = simulate_from_cooling_path(time_Myr, T_C;
+             params = GrowthParams(time_Myr, T_C; nt=2000, nx=300))
+```
+"""
+function simulate_from_cooling_path(time_Myr::AbstractVector{Float64},
+                                    T_C::AbstractVector{Float64};
+                                    params::GrowthParams = GrowthParams(time_Myr, T_C),
+                                    elements::ElementData{N} = default_element_data()) where {N}
+    length(time_Myr) == length(T_C) ||
+        throw(ArgumentError("time_Myr and T_C must have the same length"))
+    length(time_Myr) >= 2 ||
+        throw(ArgumentError("at least 2 control points are required"))
+    issorted(time_Myr) ||
+        throw(ArgumentError("time_Myr must be sorted in ascending order"))
+
+    time_yr = time_Myr .* 1.0e6
+    T_K     = T_C .+ 273.15
+    tfinal  = time_yr[end]
+
+    nt = params.nt
+    t_uniform = [(i - 1) * tfinal / (nt - 1) for i in 1:nt]
+    Th_interp = lerp_vec(time_yr, T_K, t_uniform)
+
+    ws = SimulationWorkspace(params, elements)
+    return simulate_zircon_growth!(ws, tfinal, params, elements; Th_override = Th_interp)
+end

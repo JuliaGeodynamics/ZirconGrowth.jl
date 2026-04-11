@@ -206,4 +206,37 @@ using ZirconGrowth
         @test res.rim_conc ≈ res2.rim_conc
     end
 
+    # ─── Arbitrary T(t) via Th_override ──────────────────────────────────
+    @testset "Th_override: arbitrary non-monotonic T(t)" begin
+        # Irregularly-spaced control points in °C and Myr
+        # Contains a reheating episode (non-monotonic) to stress-test stability.
+        time_Myr = Float64[0.000, 0.005, 0.015, 0.030, 0.040, 0.050, 0.075, 0.150, 0.200]
+        T_C      = Float64[940,   920,   870,   810,   840,   860,   790,   720,   680]
+
+        # With custom params (higher resolution)
+        p = GrowthParams(time_Myr, T_C; nt=2000, nx=200)
+        res = simulate_from_cooling_path(time_Myr, T_C; params=p)
+
+        # All rim concentrations must be finite and positive (no blow-up)
+        @test all(isfinite, res.rim_conc)
+        @test all(>(0), res.rim_conc)
+
+        # Crystal must have grown from its seed
+        @test res.zircon_radius_um[end] > res.zircon_radius_um[1]
+
+        # All time-series outputs finite
+        @test all(isfinite, res.zircon_radius_um)
+        @test all(isfinite, res.growth_rate)
+
+        # Default params (no explicit GrowthParams needed)
+        res2 = simulate_from_cooling_path(time_Myr, T_C)
+        @test all(isfinite, res2.rim_conc)
+        @test all(>(0), res2.rim_conc)
+
+        # Input validation: mismatched lengths
+        @test_throws ArgumentError simulate_from_cooling_path([0.0, 0.1], [900.0])
+        # Input validation: unsorted times
+        @test_throws ArgumentError simulate_from_cooling_path([0.1, 0.0], [900.0, 800.0])
+    end
+
 end

@@ -26,6 +26,8 @@ export load_element_data, default_element_data
 export zr_saturation, zr_diffusivity, trace_diffusivities, partition_coefficients
 export temperature_history, plagioclase_fraction, plagioclase_fraction_poly
 export simulate_zircon_growth, simulate_zircon_growth!, compute_profiles
+export simulate_from_cooling_path
+export lerp, lerp_vec
 export plot_trace_properties, plot_element_profiles, plot_element_ratios,
        plot_growth_diagnostics
 

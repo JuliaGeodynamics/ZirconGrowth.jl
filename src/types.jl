@@ -121,6 +121,35 @@ function GrowthParams(;
                         n_oscillations, amplitude, major_minerals)
 end
 
+"""
+    GrowthParams(time_Myr, T_C; kwargs...)
+
+Construct a `GrowthParams` from a cooling-path description.  `tfinal_years`,
+`Td`, and `T0` are derived automatically from the input vectors:
+
+- `tfinal_years = time_Myr[end] * 1e6`
+- `Td  = T_C[1]   + 273.15`   (starting temperature)
+- `T0  = T_C[end] + 273.15`   (ending temperature)
+
+Any keyword accepted by `GrowthParams(; tfinal_years, ...)` can be passed to
+override the derived values or set other parameters.
+
+# Example
+```julia
+time_Myr = [0.0, 0.05, 0.1, 0.2]
+T_C      = [940.0, 860.0, 780.0, 680.0]
+p = GrowthParams(time_Myr, T_C; nx=300, nt=2000)
+```
+"""
+function GrowthParams(time_Myr::AbstractVector{<:Real}, T_C::AbstractVector{<:Real}; kwargs...)
+    return GrowthParams(;
+        tfinal_years = Float64(time_Myr[end]) * 1e6,
+        Td           = Float64(T_C[1])   + 273.15,
+        T0           = Float64(T_C[end]) + 273.15,
+        kwargs...
+    )
+end
+
 # ─── Simulation result ────────────────────────────────────────────────────────
 
 """

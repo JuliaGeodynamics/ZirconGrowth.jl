@@ -3,6 +3,46 @@
 
 const SECONDS_PER_YEAR = 365.0 * 3600.0 * 24.0
 
+# ── Piecewise-linear interpolation ───────────────────────────────────────────
+
+"""
+    lerp(x, y, xi) -> Float64
+
+Evaluate the piecewise-linear function defined by `(x, y)` at scalar `xi`.
+`x` must be sorted in ascending order.  Values outside the range are clamped
+to the first / last data point (flat extrapolation).
+"""
+function lerp(x::AbstractVector{Float64}, y::AbstractVector{Float64}, xi::Float64)
+    xi <= x[1]   && return y[1]
+    xi >= x[end] && return y[end]
+    lo, hi = 1, length(x)
+    while hi - lo > 1
+        mid = (lo + hi) ÷ 2
+        xi < x[mid] ? (hi = mid) : (lo = mid)
+    end
+    t = (xi - x[lo]) / (x[hi] - x[lo])
+    return y[lo] + t * (y[hi] - y[lo])
+end
+
+"""
+    lerp_vec(x, y, xi_vec) -> Vector{Float64}
+
+Vectorised form of [`lerp`](@ref): interpolate the piecewise-linear function
+defined by `(x, y)` at every point in `xi_vec`.
+
+Typical use — convert an irregularly-sampled cooling history to the uniform
+grid expected by [`simulate_zircon_growth!`](@ref):
+
+```julia
+t_uniform = range(0, tfinal_years; length=nt)
+Th_K = lerp_vec(time_yr, T_K, collect(t_uniform))
+result = simulate_zircon_growth!(ws, tfinal_years, params, elements;
+                                  Th_override = Th_K)
+```
+"""
+lerp_vec(x::AbstractVector{Float64}, y::AbstractVector{Float64},
+         xi_vec::AbstractVector{Float64}) = [lerp(x, y, xi) for xi in xi_vec]
+
 # ── Zr saturation in the melt ─────────────────────────────────────────────────
 
 """
