@@ -57,6 +57,32 @@ result = simulate_zircon_growth!(ws, 500.0, p, ed)
 result = simulate_zircon_growth!(ws, 500.0, p, ed)  # still 0 allocations
 ```
 
+### Custom (irregular) cooling paths
+
+If you have a measured or modelled cooling history given as `(time_Myr, T_C)`
+control points — possibly irregularly spaced and non-monotonic (e.g. a
+reheating episode) — use [`simulate_from_cooling_path`](https://github.com/JuliaGeodynamics/ZirconGrowth.jl/blob/main/src/simulation.jl):
+
+```julia
+using ZirconGrowth
+
+# Irregularly-spaced control points, with a mid-path reheating episode
+time_Myr = Float64[0.000, 0.005, 0.030, 0.050, 0.200]
+T_C      = Float64[940,   870,   810,   860,   680]
+
+# Minimal call — duration, nt/nx, Td and T0 are all inferred from the path
+result = simulate_from_cooling_path(time_Myr, T_C)
+
+# Custom resolution / parameters
+p = GrowthParams(time_Myr, T_C; nt=2000, nx=300)
+result = simulate_from_cooling_path(time_Myr, T_C; params=p)
+```
+
+Internally this interpolates the control points onto the uniform time grid
+used by the solver and runs `simulate_zircon_growth!` with the interpolated
+temperatures passed as `Th_override`. See [`scripts/custom_cooling_path.jl`](scripts/custom_cooling_path.jl)
+for a complete runnable example.
+
 ### Plotting (GLMakie extension)
 
 Plotting functions are provided via a package extension that loads
