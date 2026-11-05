@@ -5,7 +5,7 @@
   "upload_type": "software",
   "creators": [
     {"name": "Kaus, Boris J. P.", "affiliation": "Johannes Gutenberg University Mainz", "orcid": "0000-0002-0247-8660"},
-    {"name": "Melnik, Oleg", "affiliation": "University of Oxford"}
+    {"name": "Melnik, Oleg", "affiliation": "University of Oxford", "orcid": "0000-0002-4655-5269"}
   ],
   "keywords": ["zircon", "magma", "Julia", "geochronology"]
 }
