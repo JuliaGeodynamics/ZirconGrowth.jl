@@ -1,12 +1,13 @@
 # ZirconGrowth.jl
 
 [![CI](https://github.com/JuliaGeodynamics/ZirconGrowth.jl/actions/workflows/CI.yml/badge.svg)](https://github.com/JuliaGeodynamics/ZirconGrowth.jl/actions/workflows/CI.yml)
+[![DOI](https://zenodo.org/badge/1184354047.svg)](https://zenodo.org/badge/latestdoi/1184354047)
 
 This Julia package simulates zircon growth from a melt along with trace element evolution. It is a Julia translation of the MATLAB codes accompanying:
 
-> Bindeman, I., Melnik, O., 2026. Non-equilibrium behavior of trace elements during zircon crystallization from the melt. *Earth and Planetary Science Letter*s* 673, 119723. https://doi.org/10.1016/j.epsl.2025.119723
+> Bindeman, I., Melnik, O., 2026. Non-equilibrium behavior of trace elements during zircon crystallization from the melt. *Earth and Planetary Science Letters* 673, 119723. https://doi.org/10.1016/j.epsl.2025.119723
 
-The original MATLAB implementation was done by **Oleg Melnik**. This package is a ldirect translation into Julia, validated against the MATLAB output to 8+ significant figures.
+The original MATLAB implementation was done by **Oleg Melnik**. This package is a direct translation into Julia, validated against the MATLAB output to 8+ significant figures.
 
 Numerical model of zircon crystal growth in a cooling silicate melt, tracking Zr saturation and 11 trace-element (Hf, Y, U, Th, Sm, Dy, Yb, P, Nb, Sc, Li) concentration profiles.
 
