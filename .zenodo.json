@@ -1,0 +1,11 @@
+{
+  "title": "ZirconGrowth.jl",
+  "description": "Julia package that simulates zircon growth and trace-element evolution along the temperature-time path of a cooling silicate melt (Bindeman & Melnik, 2026).",
+  "license": "MIT",
+  "upload_type": "software",
+  "creators": [
+    {"name": "Kaus, Boris J. P.", "affiliation": "Johannes Gutenberg University Mainz", "orcid": "0000-0002-0247-8660"},
+    {"name": "Melnik, Oleg", "affiliation": "University of Oxford"}
+  ],
+  "keywords": ["zircon", "magma", "Julia", "geochronology"]
+}
